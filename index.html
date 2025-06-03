@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da cobrinha</title>
+  <style>
+    #campo{
+      margin: 0 auto;
+      background-color: lightgreen;
+      width: 1400px;
+      height: 625px;
+      position: relative;
+    }
+    .bodyPart, #fruit{
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background-color: blue;
+    }
+    .bodyPart:first-of-type{
+      top: 200px;
+      left: 200px;
+    }
+    #fruit{
+      background-color: red;
+      top: 400px;
+      left: 500px;
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="options">
+    <button id="play" onclick="window.location.reload()">Jogar</button>
+  </div>
+
+  <div id="campo">
+    <div id="fruit"></div>
+    <div id="snake">
+      <div class="bodyPart"></div>
+    </div>
+  </div>
+
+  <script>
+    const snake = document.getElementById("snake")
+    let snakePos = [[400,200]]
+    document.querySelector(".bodyPart").style.top = snakePos[0][0] + "px"
+    document.querySelector(".bodyPart").style.left = snakePos[0][1] + "px"
+
+    const fruit = document.getElementById("fruit")
+    let fruitPos = [400, 500]
+    document.querySelector("#fruit").style.top = fruitPos[0]
+    document.querySelector("#fruit").style.left = fruitPos[1]
+
+    const velocidade = 25
+    let direcao = "d"
+    let canMove = true
+    let coordX = []
+    let coordY = []
+
+    for(let i = 0; i < 1400; i +=25){
+      coordX.push(i)
+      if(i < 625){
+        coordY.push(i)
+      }
+    }
+
+    // Gerenciar inputs do usuário
+    function handleMovement(e){
+      switch(e.key){
+        case "w":
+          if(direcao == "s" || e.key == direcao) return
+          else{
+            direcao = e.key 
+            moveSnake()
+          } 
+          break
+
+        case "a":
+          if(direcao == "d" || e.key == direcao) return
+          else{
+            direcao = e.key 
+            moveSnake()
+          } 
+          break
+
+        case "s":
+          if(direcao == "w" || e.key == direcao) return
+          else{
+            direcao = e.key 
+            moveSnake()
+          } 
+          break
+
+        case "d":
+          if(direcao == "a" || e.key == direcao) return
+          else{
+            direcao = e.key 
+            moveSnake()
+          } 
+          break
+      }
+    }
+
+    // Mover a cobra para a respectiva direção
+    async function moveSnake(){
+
+      let yHead = snakePos[0][0]
+      let xHead = snakePos[0][1]
+
+      switch (direcao) {
+        case "w":
+          yHead-=velocidade
+          break;
+        case "a":
+          xHead-=velocidade
+          break;
+        case "s":
+          yHead+=velocidade
+          break;
+        case "d":
+          xHead+=velocidade
+          break;
+      }
+      
+
+      await updatePos(yHead, xHead)
+      const res = await outOfBounds()
+      if(res) return
+      await touchingSnake()
+      await touchingFruit()
+      await updateFrames()
+
+      canMove = false
+      // switch(direcao){
+      //   case "w": 
+      //     snakePos.unshift([snakePos[0][0]+25, snakePos[0][1]])        
+      //     break
+      //   case "a": 
+      //     snakePos.unshift([snakePos[0][0], snakePos[0][1]-25])        
+
+      //     break
+      //   case "s": 
+      //     snakePos.unshift([snakePos[0][0]-25, snakePos[0][1]])        
+
+      //     break
+      //   case "d": 
+      //     snakePos.unshift([snakePos[0][0], snakePos[0][1]+25])        
+
+      //     break
+      // }
+
+    }
+
+    // Atualizar a posição da cobra
+    function updatePos(y, x){
+      snakePos.unshift([y, x])
+
+    }
+
+    function updateFrames(){
+      const bodyParts = document.getElementsByClassName("bodyPart")
+
+      for(let i = 0; i < snakePos.length; i++){
+        bodyParts[i].style.top = snakePos[i][0] + "px"
+        bodyParts[i].style.left = snakePos[i][1] + "px"
+      }
+
+    }
+
+    // Verificar se está tocando a fruta
+    function touchingFruit(){
+      if(snakePos[0][1] == fruitPos[1] &&
+        snakePos[0][0] == fruitPos[0]){
+       
+        addToBody()
+        generateFruit()
+      } else{
+        snakePos.pop()
+      }
+    }
+
+    function touchingSnake(){
+      let xHead = snakePos[0][1]
+      let yHead = snakePos[0][0]
+
+      snakePos.forEach((pos, i) =>{
+        if(i != 0){
+          if(xHead == pos[1] && yHead == pos[0]){
+            lose()
+          }
+        }
+      })
+    }
+
+    function outOfBounds(){
+      if(snakePos[0][1] < 0 || snakePos[0][1] > 1375 ||
+        snakePos[0][0] < 0 || snakePos[0][0] > 600
+      ){
+        lose()
+        return true
+      }
+
+      return false
+    }
+
+    // Adicionar corpo a cobra se tocar na fruta
+    function addToBody(){
+        const div = document.createElement("div")
+        div.classList.add("bodyPart")
+
+        document.getElementById("snake").appendChild(div)
+    }
+
+    // Gerar a fruta em outra posição
+    function generateFruit(){
+
+      let xRand = Math.floor(Math.random()*coordX.length)
+      let yRand = Math.floor(Math.random()*coordY.length)
+      
+      console.log(coordY[yRand], coordX[xRand])
+
+      fruitPos = [coordY[yRand], coordX[xRand]]
+      document.querySelector("#fruit").style.top = fruitPos[0] + "px"
+      document.querySelector("#fruit").style.left = fruitPos[1] + "px"
+    }
+
+    // Perder
+    function lose(){
+      alert("Perdeu otário")
+      clearInterval(intervalo)
+    }
+
+    var intervalo = setInterval(() => {
+      moveSnake()
+      canMove = true
+    }, 250)
+    document.body.addEventListener("keypress", (e) => handleMovement(e))
+  </script>
+</body>
+</html>
