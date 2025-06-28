@@ -1,4 +1,4 @@
-# Jogo da cobrinha
+# 🐍 Jogo da cobrinha
 
 ## 🌐 Link do projeto
 https://felipe-gabriel-souza-goncalves.github.io/Jogo-da-cobrinha/
