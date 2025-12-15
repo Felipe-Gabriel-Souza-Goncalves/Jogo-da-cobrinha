@@ -1,317 +1,376 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jogo da cobrinha</title>
-  <style>
-    body{
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    #bg-options{
-      width: 100vw;
-      height: 100vh;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 2;
-      background-color: rgba(85, 85, 85, 0.342);
-      backdrop-filter: blur(5px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #options{
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      width: 400px;
-      height: 400px;
-      padding: 50px 25px;
-      background-color: lightgray;
-      border-radius: 15px;
-      border: 4px solid gray;
-    }
-    #play{
-      padding: 5px 15px;
-      border: 5px solid rgb(53, 53, 53);
-      border-radius: 10px;
-      color: rgb(31, 31, 31);
-      background-color: lightgrey;
-      font-size: 2.5em;
-      transition: .5s;
-    }
-    #play:hover{
-      rotate: -3deg;
-      scale: 1.1;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    #campo{
-      margin: 0 auto;
-      border: 10px solid green;
-      background-color: lightgreen;
-      width: 1400px;
-      height: 625px;
-      position: relative;
-    }
-    .bodyPart, #fruit{
-      position: absolute;
-      width: 25px;
-      height: 25px;
-      background-color: blue;
-    }
-    .bodyPart:first-of-type{
-      top: 200px;
-      left: 200px;
-    }
-    #fruit{
-      background-color: red;
-      top: 400px;
-      left: 500px;
-    }
-  </style>
-</head>
-<body>
-  <div id="bg-options">
-    <div id="options">
-      <h1>Jogo da cobrinha</h1>
-      <p>Pontuação mais alta: <span id="highScore">0</span></p>
-      <button id="play" onclick="play()" autofocus>Jogar</button>
-    </div>
-  </div>
-
-  <p>Pontuação: <span id="points"></span></p>
-  <div id="campo">
-    <div id="fruit"></div>
-    <div id="snake">
-      <div class="bodyPart"></div>
-    </div>
-  </div>
-
-  <script>
-    const snake = document.getElementById("snake")
-    let snakePos = [[400,200]]
-    document.querySelector(".bodyPart").style.top = snakePos[0][0] + "px"
-    document.querySelector(".bodyPart").style.left = snakePos[0][1] + "px"
-
-    const fruit = document.getElementById("fruit")
-    let fruitPos = [400, 500]
-    fruit.style.top = fruitPos[0] + "px"
-    fruit.style.left = fruitPos[1] + "px"
-
-    const velocidade = 25
-    const keys = {
-      "w" : ["w", "s"],
-      "a" : ["a", "d"],
-      "s" : ["s", "w"],
-      "d" : ["d", "a"],
-      // "W" : ["W", "S"],
-      // "A" : ["A", "D"],
-      // "S" : ["S", "W"],
-      // "D" : ["D", "A"],
-      // "ArrowUp" : ["ArrowUp", "ArrowDown"],
-      // "ArrowLeft" : ["ArrowLeft", "ArrowRight"],
-      // "ArrowDown" : ["ArrowDown", "ArrowUp"],
-      // "ArrowRight" : ["ArrowRight", "ArrowLeft"],
-    }
-    let direcao = "d"
-    let nextDirecao = "d"
-    let canMove = true
-    let coordX = []
-    let coordY = []
-    let gameOn = false
-
-    for(let i = 0; i < 1400; i +=25){
-      coordX.push(i)
-      if(i < 625){
-        coordY.push(i)
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet" />
+    <title>Jogo da cobrinha</title>
+    <style>
+      * {
+        font-family: "Pixelify Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
-    }
+      *:not(#campo) {
+        box-sizing: border-box;
+      }
 
-    function play(){
-      document.getElementById("bg-options").style.display = "none"
-      snakePos = [[400,200]]
-      document.querySelector(".bodyPart").style.top = snakePos[0][0] + "px"
-      document.querySelector(".bodyPart").style.left = snakePos[0][1] + "px"
+      body {
+        margin: 0;
+        text-align: center;
+        overflow: hidden;
+      }
+      footer {
+        padding: 12px 0px;
+      }
 
-      fruitPos = [400, 500]
-      fruit.style.top = fruitPos[0] + "px"
-      fruit.style.left = fruitPos[1] + "px"
+      #bg-options {
+        min-width: 100vw;
+        min-height: 100vh;
+        position: absolute;
+        top: 0px;
+        left: 0;
+        z-index: 2;
+        background-color: rgba(85, 85, 85, 0.342);
+        backdrop-filter: blur(5px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #options {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        height: 400px;
+        padding: 50px 25px;
+        background-color: rgb(218, 218, 218);
 
-      document.getElementById("snake").innerHTML = `<div class="bodyPart"></div>`
+        /*Esse clip-path deixa a borda pixelada*/
+        /*Fonte: https://pixelcorners.lukeb.co.uk/ */
+        clip-path: polygon( 
+          0px calc(100% - 20px), 4px calc(100% - 20px), 4px calc(100% - 12px), 8px calc(100% - 12px),
+          8px calc(100% - 8px), 12px calc(100% - 8px), 12px calc(100% - 4px), 20px calc(100% - 4px),
+          20px 100%, calc(100% - 20px) 100%, calc(100% - 20px) calc(100% - 4px), calc(100% - 12px) calc(100% - 4px),
+          calc(100% - 12px) calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) calc(100% - 12px), calc(100% - 4px) calc(100% - 12px), calc(100% - 4px) calc(100% - 20px), 100% calc(100% - 20px), 100% 20px,
+          calc(100% - 4px) 20px, calc(100% - 4px) 12px, calc(100% - 8px) 12px, calc(100% - 8px) 8px,
+          calc(100% - 12px) 8px, calc(100% - 12px) 4px, calc(100% - 20px) 4px, calc(100% - 20px) 0px, 20px 0px,
+          20px 4px, 12px 4px, 12px 8px, 8px 8px, 8px 12px, 4px 12px, 4px 20px, 0px 20px
+        );
+      }
+      #options p {
+        margin: 0;
+        font-size: 1.2em;
+      }
+      #play {
+        padding: 4px 16px;
+        border: 4px solid rgb(53, 53, 53);
+        color: rgb(31, 31, 31);
+        background-color: lightgrey;
+        font-size: 2.5em;
+        transition: 0.5s;
+        outline: 0;
+        cursor: pointer;
+      }
+      #play:hover,
+      #play:focus {
+        rotate: -2deg;
+        scale: 1.1;
+      }
 
-      direcao = "d"
-      nextDirecao = "d"
+      p:has(#currentScore) {
+        font-size: 1.4em;
+      }
 
-      gameOn = true
-    }
-    
-    // Gerenciar inputs do usuário
-    function handleMovement(e){
-      let keyPressed = keys[e.key]
-      if(keyPressed == undefined) return
-      else{
-        if(direcao == keyPressed[1] || keyPressed[0] == direcao) return
-        else{
-          nextDirecao = keyPressed[0]
+      #campo {
+        margin: 0 auto;
+        border: 10px solid green;
+        background-color: lightgreen;
+        background: url(./fundo_cobrinha.png);
+        background-repeat: repeat;
+        background-size: 50px;
+        width: 1400px;
+        height: 625px;
+        position: relative;
+      }
+      .bodyPart,
+      #fruit {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        background-color: blue;
+      }
+      .bodyPart:first-of-type {
+        top: 200px;
+        left: 200px;
+      }
+      #fruit {
+        background-color: red;
+        top: 400px;
+        left: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bg-options">
+      <div id="options">
+        <h1>Jogo da cobrinha</h1>
+        <div>
+          <p>Pontuação mais alta: <span id="highScore">0</span></p>
+          <p>Pontuação atual: <span id="endScore">0</span></p>
+        </div>
+        <button id="play" onclick="play()" autofocus>Jogar</button>
+      </div>
+    </div>
+
+    <p>Pontuação: <span id="currentScore">0</span></p>
+    <div id="campo">
+      <div id="fruit"></div>
+      <div id="snake">
+        <div class="bodyPart"></div>
+      </div>
+    </div>
+
+    <footer>
+      Repositório do projeto:
+      <a target="_blank" href="https://felipe-gabriel-souza-goncalves.github.io/Jogo-da-cobrinha/"
+        ><br />
+        https://felipe-gabriel-souza-goncalves.github.io/Jogo-da-cobrinha/</a
+      >
+    </footer>
+
+    <script>
+      const campoWidth = 50 * 25; // 1000
+      const campoHeight = 20 * 25; // 500
+
+      const snake = document.getElementById("snake");
+      let snakePos = [[400, 200]];
+      document.querySelector(".bodyPart").style.top = snakePos[0][0] + "px";
+      document.querySelector(".bodyPart").style.left = snakePos[0][1] + "px";
+
+      const fruit = document.getElementById("fruit");
+      let fruitPos = [400, 500];
+      fruit.style.top = fruitPos[0] + "px";
+      fruit.style.left = fruitPos[1] + "px";
+
+      const velocidade = 25;
+      const keys = {
+        // Tecla apertada: [direção, direção contrária]
+        w: ["w", "s"],
+        a: ["a", "d"],
+        s: ["s", "w"],
+        d: ["d", "a"],
+        W: ["w", "s"],
+        A: ["a", "d"],
+        S: ["s", "w"],
+        D: ["d", "a"],
+        ArrowUp: ["w", "s"],
+        ArrowLeft: ["a", "d"],
+        ArrowDown: ["s", "w"],
+        ArrowRight: ["d", "a"],
+      };
+      let direcao = "d";
+      let nextDirecao = "d";
+      let canMove = true;
+      let coordX = [];
+      let coordY = [];
+      let gameOn = false;
+
+      for (let i = 0; i < campoWidth; i += 25) {
+        coordX.push(i);
+        if (i < campoHeight) {
+          coordY.push(i);
         }
       }
-    }
+      document.getElementById("campo").style.width = campoWidth + "px";
+      document.getElementById("campo").style.height = campoHeight + "px";
 
-    // Mover a cobra para a respectiva direção
-    async function moveSnake(){
-      direcao = nextDirecao
+      function play() {
+        document.getElementById("currentScore").innerText = "0";
+        document.getElementById("bg-options").style.display = "none";
+        document.body.style.overflow = "unset";
 
-      let yHead = snakePos[0][0]
-      let xHead = snakePos[0][1]
+        snakePos = [[400, 200]];
+        document.querySelector(".bodyPart").style.top = snakePos[0][0] + "px";
+        document.querySelector(".bodyPart").style.left = snakePos[0][1] + "px";
 
-      switch (direcao) {
-        case "w":
-          yHead-=velocidade
-          break;
-        case "a":
-          xHead-=velocidade
-          break;
-        case "s":
-          yHead+=velocidade
-          break;
-        case "d":
-          xHead+=velocidade
-          break;
+        fruitPos = [400, 500];
+        fruit.style.top = fruitPos[0] + "px";
+        fruit.style.left = fruitPos[1] + "px";
+
+        document.getElementById("snake").innerHTML = `<div class="bodyPart"></div>`;
+
+        direcao = "d";
+        nextDirecao = "d";
+
+        gameOn = true;
       }
-      
 
-      await updatePos(yHead, xHead)
-      const res = await outOfBounds()
-      if(res) return
-      await touchingSnake()
-      await touchingFruit()
-      await updateFrames()
-
-      // Impede múltiplos movimentos
-      canMove = false
-
-    }
-
-    // Atualizar a posição da cobra
-    function updatePos(y, x){
-      snakePos.unshift([y, x])
-    }
-
-    function updateFrames(){
-      const bodyParts = document.getElementsByClassName("bodyPart")
-
-      for(let i = 0; i < snakePos.length; i++){
-        bodyParts[i].style.top = snakePos[i][0] + "px"
-        bodyParts[i].style.left = snakePos[i][1] + "px"
-      }
-    }
-
-    // Verificar se está tocando a fruta
-    function touchingFruit(){
-      // Se a cobra tocar na fruta
-      if(snakePos[0][1] == fruitPos[1] &&
-        snakePos[0][0] == fruitPos[0]){
-       
-        addToBody()
-        generateFruit()
-      } else{
-        // Se não encostar, remove a última posição
-        snakePos.pop()
-      }
-    }
-
-    function touchingSnake(){
-      // Pega a posição da cabeça
-      let xHead = snakePos[0][1]
-      let yHead = snakePos[0][0]
-
-      // Verifica se não está se colidindo
-      snakePos.forEach((pos, i) =>{
-        if(i != 0){
-          if(xHead == pos[1] && yHead == pos[0]){
-            lose()
+      // Gerenciar inputs do usuário
+      function handleMovement(e) {
+        let keyPressed = keys[e.key];
+        if (keyPressed == undefined) return;
+        else {
+          if (direcao == keyPressed[1] || keyPressed[0] == direcao) return;
+          else {
+            nextDirecao = keyPressed[0];
           }
         }
-      })
-    }
-
-    // Verifica se a cobra não está fora do campo de jogo
-    function outOfBounds(){
-      if(snakePos[0][1] < 0 || snakePos[0][1] > 1375 ||
-        snakePos[0][0] < 0 || snakePos[0][0] > 600
-      ){
-        lose()
-        return true
       }
 
-      return false
-    }
+      // Mover a cobra para a respectiva direção
+      async function moveSnake() {
+        direcao = nextDirecao;
 
-    // Adicionar corpo a cobra se tocar na fruta
-    function addToBody(){
+        let yHead = snakePos[0][0];
+        let xHead = snakePos[0][1];
+
+        switch (direcao) {
+          case "w":
+            yHead -= velocidade;
+            break;
+          case "a":
+            xHead -= velocidade;
+            break;
+          case "s":
+            yHead += velocidade;
+            break;
+          case "d":
+            xHead += velocidade;
+            break;
+        }
+
+        await updatePos(yHead, xHead);
+        const res = await outOfBounds();
+        if (res) return;
+        await touchingSnake();
+        await touchingFruit();
+        await updateFrames();
+
+        // Impede múltiplos movimentos
+        canMove = false;
+      }
+
+      // Atualizar a posição da cobra
+      function updatePos(y, x) {
+        snakePos.unshift([y, x]);
+      }
+
+      function updateFrames() {
+        const bodyParts = document.getElementsByClassName("bodyPart");
+
+        for (let i = 0; i < snakePos.length; i++) {
+          bodyParts[i].style.top = snakePos[i][0] + "px";
+          bodyParts[i].style.left = snakePos[i][1] + "px";
+        }
+      }
+
+      // Verificar se está tocando a fruta
+      function touchingFruit() {
+        // Se a cobra tocar na fruta
+        if (snakePos[0][1] == fruitPos[1] && snakePos[0][0] == fruitPos[0]) {
+          addToBody();
+          generateFruit();
+        } else {
+          // Se não encostar, remove a última posição
+          snakePos.pop();
+        }
+      }
+
+      function touchingSnake() {
+        // Pega a posição da cabeça
+        let xHead = snakePos[0][1];
+        let yHead = snakePos[0][0];
+
+        // Verifica se não está se colidindo
+        snakePos.forEach((pos, i) => {
+          if (i != 0) {
+            if (xHead == pos[1] && yHead == pos[0]) {
+              lose();
+            }
+          }
+        });
+      }
+
+      // Verifica se a cobra não está fora do campo de jogo
+      function outOfBounds() {
+        if (
+          snakePos[0][1] < 0 ||
+          snakePos[0][1] > campoWidth - 25 ||
+          snakePos[0][0] < 0 ||
+          snakePos[0][0] > campoHeight - 25
+        ) {
+          lose();
+          return true;
+        }
+
+        return false;
+      }
+
+      // Adicionar corpo a cobra se tocar na fruta
+      function addToBody() {
         // Cria uma parte do corpo da cobra
-        const div = document.createElement("div")
-        div.classList.add("bodyPart")
-        document.getElementById("snake").appendChild(div)
+        const div = document.createElement("div");
+        div.classList.add("bodyPart");
+        document.getElementById("snake").appendChild(div);
 
         // Atualiza a pontuação
-        document.getElementById("points").innerText = (snakePos.length - 1)
-
-    }
-
-    // Gerar a fruta em outra posição
-    function generateFruit(){
-
-      // Gera novas coordenadas para a fruta
-      let xRand = Math.floor(Math.random()*coordX.length)
-      let yRand = Math.floor(Math.random()*coordY.length)
-      
-      // Atualiza a posição da fruta no back-end
-      fruitPos = [coordY[yRand], coordX[xRand]]
-
-      // Atualiza a posição da fruta no front-end
-      fruit.style.top = fruitPos[0] + "px"
-      fruit.style.left = fruitPos[1] + "px"
-    }
-
-    // Perder
-    async function lose(){
-      gameOn = false
-
-      // Anima a cobrinha perdendo
-      for(let i = 0; i < document.getElementsByClassName("bodyPart").length; i++){
-        document.getElementsByClassName("bodyPart")[i].style.backgroundColor = "gray"
-        await new Promise((resolve => setTimeout(() => {resolve()}, 85)))
+        document.getElementById("currentScore").innerText = snakePos.length - 1;
       }
 
-      if(sessionStorage.getItem("highScore") == null ||
-         sessionStorage.getItem("highScore") < (snakePos.length - 2)){
-           sessionStorage.setItem("highScore", (snakePos.length - 2))
+      // Gerar a fruta em outra posição
+      function generateFruit() {
+        // Gera novas coordenadas para a fruta
+        let xRand = Math.floor(Math.random() * coordX.length);
+        let yRand = Math.floor(Math.random() * coordY.length);
+
+        // Atualiza a posição da fruta no back-end
+        fruitPos = [coordY[yRand], coordX[xRand]];
+
+        // Atualiza a posição da fruta no front-end
+        fruit.style.top = fruitPos[0] + "px";
+        fruit.style.left = fruitPos[1] + "px";
+      }
+
+      // Perder
+      async function lose() {
+        const bodyParts = document.getElementsByClassName("bodyPart")
+        gameOn = false;
+
+        // Anima a cobrinha perdendo
+        for (let i = 0; i < bodyParts.length; i++) {
+          bodyParts[i].style.backgroundColor = "gray";
+          const resolveTime = bodyParts.length < 30 ? 85 : (2500 / bodyParts.length).toFixed(0)
+          await new Promise((resolve) => setTimeout(() => {resolve();}, resolveTime));
         }
-      console.log(sessionStorage.getItem("highScore"))
-      document.getElementById("highScore").innerText = sessionStorage.getItem("highScore")
-      document.getElementById("bg-options").style.display = "flex"
 
-      alert("Você perdeu!")
-    }
+        if (sessionStorage.getItem("highScore") == null || sessionStorage.getItem("highScore") < snakePos.length - 2) {
+          sessionStorage.setItem("highScore", snakePos.length - 2);
+        }
 
-    // Roda a 5fps para carregar o jogo
-    var intervalo = setInterval(() => {
-      if(gameOn == false) return
-      moveSnake()
-      canMove = true
-    }, 200)
+        document.getElementById("endScore").innerText = snakePos.length - 2;
+        document.getElementById("highScore").innerText = sessionStorage.getItem("highScore");
+        document.getElementById("bg-options").style.display = "flex";
+        document.body.style.overflow = "hidden";
 
-    if(sessionStorage.getItem("highScore") !== null){
-      document.getElementById("highScore").innerText = sessionStorage.getItem("highScore")
-    }
+        alert("Você perdeu!");
+      }
 
-    // Controla o acionamento de tecla
-    document.body.addEventListener("keypress", (e) => handleMovement(e))
-  </script>
-</body>
+      // Roda a 5fps para carregar o jogo
+      var intervalo = setInterval(() => {
+        if (gameOn == false) return;
+        moveSnake();
+        canMove = true;
+      }, 140);
+
+      if (sessionStorage.getItem("highScore") !== null) {
+        document.getElementById("highScore").innerText = sessionStorage.getItem("highScore");
+      }
+
+      // Controla o acionamento de tecla
+      document.body.addEventListener("keydown", (e) => handleMovement(e));
+    </script>
+  </body>
 </html>
